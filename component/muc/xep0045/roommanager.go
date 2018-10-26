@@ -235,12 +235,12 @@ func (r *ChatRoom) processMessage(message *xmpp.Message) error {
 func (r *ChatRoom) processPresence(presence *xmpp.Presence, stm stream.C2S) error {
 	log.Infof("进入 chat room 的processPresence（） 方法")
 	//TODO 判断房间是否存在，如果不存在则创建r.CreateChatRoom(presence)，如果存在则进入房间r.SendChatRoom(presence)
-	//step1:获取服务列表
-	roomitms, err := storage.Instance().FetchRoomItems()
+	//step1:获取房间列表
+	roomitms, err := storage.Instance().FetchRoomItems(presence.ToJID().Domain())
 	if err == nil {
 		for _, roomitem := range roomitms {
+			//step2:判断当前房间是否在已存在的房间列表中 - 在
 			if presence.ToJID().Node() == roomitem.Roomname {
-				//step2:判断当前房间是否在服务列表中 - 在
 				err := r.SendChatRoom(presence)
 				return err
 			}
@@ -482,7 +482,7 @@ func (r *ChatRoom) CreateChatRoomResult(iq *xmpp.IQ, stm stream.C2S) error {
 	ri := roommodel.RoomItem{iq.ToJID().Node(), iq.ToJID().Domain(), "", false, 1}
 	err := storage.Instance().InsertOrUpdateRoomItem(&ri)
 	if err != nil {
-		log.Infof("InsertOrUpdateRoomItem room... (%s)", err)
+		log.Errorf("InsertOrUpdateRoomItem room... (%s)", err)
 		return err
 	}
 	return nil

@@ -25,7 +25,7 @@ type roomStorage interface {
 	DeleteRoomItem(username, jid string) error
 
 	// 查询所有房间列表.
-	FetchRoomItems( /*username string*/ ) ([]roommodel.RoomItem, error)
+	FetchRoomItems(domainname string) ([]roommodel.RoomItem, error)
 }
 
 //房间成员持久化接口

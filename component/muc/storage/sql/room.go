@@ -15,9 +15,9 @@ import (
 func (s *Storage) InsertOrUpdateRoomItem(ri *roommodel.RoomItem) error {
 	err := s.inTransaction(func(tx *sql.Tx) error {
 		q := sq.Insert("rooms").
-			Columns("roomname","roomserver", "password", "ispravite",  "roomtype", "update_at", "create_at").
-			Values(ri.Roomname,ri.Roomserver,ri.Password,ri.Ispravite,ri.Roomtype, nowExpr, nowExpr).
-			Suffix("ON DUPLICATE KEY UPDATE roomname = ?, roomserver = ?, password = ?, ispravite = ?, roomtype = ?, update_at = NOW(), create_at = NOW()", ri.Roomname,ri.Roomserver,ri.Password,ri.Ispravite,ri.Roomtype)
+			Columns("roomname", "roomserver", "password", "ispravite", "roomtype", "update_at", "create_at").
+			Values(ri.Roomname, ri.Roomserver, ri.Password, ri.Ispravite, ri.Roomtype, nowExpr, nowExpr).
+			Suffix("ON DUPLICATE KEY UPDATE roomname = ?, roomserver = ?, password = ?, ispravite = ?, roomtype = ?, update_at = NOW(), create_at = NOW()", ri.Roomname, ri.Roomserver, ri.Password, ri.Ispravite, ri.Roomtype)
 
 		_, err := q.RunWith(tx).Exec()
 		return err
@@ -51,10 +51,10 @@ func (s *Storage) DeleteRoomItem(username, jid string) error {
 }
 
 // 查询所有房间.
-func (s *Storage) FetchRoomItems(/*username string*/) ([]roommodel.RoomItem,  error) {
+func (s *Storage) FetchRoomItems(domainname string) ([]roommodel.RoomItem, error) {
 	q := sq.Select("roomname", "roomserver").
 		From("rooms").
-		//Where(sq.Eq{"username": username}).
+		Where(sq.Eq{"roomserver": domainname}).
 		OrderBy("create_at DESC")
 
 	rows, err := q.RunWith(s.db).Query()
@@ -71,7 +71,7 @@ func (s *Storage) FetchRoomItems(/*username string*/) ([]roommodel.RoomItem,  er
 	if err != nil {
 		return nil, err
 	}
-	return items,  nil
+	return items, nil
 }
 
 // FetchRoomItem retrieves from storage a roster item entity.
@@ -94,11 +94,11 @@ func (s *Storage) FetchRoomItems(/*username string*/) ([]roommodel.RoomItem,  er
 */
 
 func (s *Storage) scanRoomItemEntity(ri *roommodel.RoomItem, scanner rowScanner) error {
-//	var groups string
+	//	var groups string
 	if err := scanner.Scan(&ri.Roomname, &ri.Roomserver); err != nil {
 		return err
 	}
-//	ri.Groups = strings.Split(groups, ";")
+	//	ri.Groups = strings.Split(groups, ";")
 	return nil
 }
 
